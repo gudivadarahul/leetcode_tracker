@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors"); // Import the cors package
 const authRoutes = require("./routes/auth");
+const problemRoutes = require("./routes/problems");
 const PORT = process.env.PORT || 8000;
 
 const app = express();
@@ -11,6 +12,7 @@ app.use(cors());
 
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use("/api/problems", problemRoutes);
 
 mongoose
   .connect("mongodb://localhost:27018/leetcode-tracker")
