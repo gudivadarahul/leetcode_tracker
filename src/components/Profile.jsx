@@ -24,6 +24,10 @@ const Profile = () => {
         }
       );
       toast.success("Profile updated successfully.");
+      if (email !== auth.user) {
+        logout();
+        toast.info("Please log in again with your new email.");
+      }
     } catch (error) {
       setError("Error updating profile");
       toast.error("Error updating profile.");

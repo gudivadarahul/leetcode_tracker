@@ -9,27 +9,24 @@ const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState({ token: null, user: null });
 
   useEffect(() => {
-    const checkTokenExpiry = async () => {
+    const checkToken = async () => {
       const token = localStorage.getItem("token");
       const user = localStorage.getItem("user");
       if (token && user) {
-        try {
-          const { default: jwtDecode } = await import("jwt-decode");
-          const decodedToken = jwtDecode(token);
-          if (decodedToken.exp * 1000 < Date.now()) {
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-            setAuth({ token: null, user: null });
-            toast.error("Session expired, please log in again.");
-          } else {
-            setAuth({ token, user });
-          }
-        } catch (error) {
-          console.error("Failed to load jwt-decode:", error);
+        const jwtDecode = (await import("jwt-decode")).default;
+        const decodedToken = jwtDecode(token);
+        if (decodedToken.exp * 1000 < Date.now()) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setAuth({ token: null, user: null });
+          toast.error("Session expired, please log in again.");
+        } else {
+          setAuth({ token, user });
         }
       }
     };
-    checkTokenExpiry();
+
+    checkToken();
   }, []);
 
   const login = async (email, password) => {
@@ -44,7 +41,11 @@ const AuthProvider = ({ children }) => {
       localStorage.setItem("user", email);
       toast.success("Logged in successfully!");
     } catch (error) {
-      toast.error("Login failed. Please check your credentials.");
+      if (error.response && error.response.data) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Login failed. Please check your credentials.");
+      }
     }
   };
 
@@ -60,7 +61,11 @@ const AuthProvider = ({ children }) => {
       localStorage.setItem("user", email);
       toast.success("Signed up successfully!");
     } catch (error) {
-      toast.error("Signup failed. Please try again.");
+      if (error.response && error.response.data) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Signup failed. Please try again.");
+      }
     }
   };
 

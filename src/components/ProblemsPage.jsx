@@ -1,7 +1,8 @@
 // src/components/ProblemsPage.jsx
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useCallback } from "react";
 import { ProblemsContext } from "../context/ProblemsContext";
 import { Link } from "react-router-dom";
+import { debounce } from "lodash";
 import { Oval } from "react-loader-spinner";
 
 const ProblemsPage = () => {
@@ -23,6 +24,10 @@ const ProblemsPage = () => {
   const [editingProblem, setEditingProblem] = useState(null);
   const [formError, setFormError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+
+  const debouncedFilterProblems = useCallback(debounce(filterProblems, 300), [
+    filterProblems,
+  ]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -62,7 +67,7 @@ const ProblemsPage = () => {
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
-    filterProblems(e.target.value);
+    debouncedFilterProblems(e.target.value);
   };
 
   return (
