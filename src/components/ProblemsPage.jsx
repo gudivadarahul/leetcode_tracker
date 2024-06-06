@@ -11,6 +11,7 @@ const ProblemsPage = () => {
     deleteProblem,
     loading,
     error,
+    filterProblems,
   } = useContext(ProblemsContext);
   const [newProblem, setNewProblem] = useState({
     title: "",
@@ -20,6 +21,7 @@ const ProblemsPage = () => {
   });
   const [editingProblem, setEditingProblem] = useState(null);
   const [formError, setFormError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -57,6 +59,11 @@ const ProblemsPage = () => {
     setEditingProblem({ ...problem, tags: problem.tags.join(", ") });
   };
 
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+    filterProblems(e.target.value);
+  };
+
   return (
     <div>
       <h2>Problems</h2>
@@ -65,6 +72,13 @@ const ProblemsPage = () => {
       </nav>
       {loading && <p>Loading...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
+      <input
+        type="text"
+        placeholder="Search problems by title..."
+        value={searchTerm}
+        onChange={handleSearch}
+        style={{ marginBottom: "20px", padding: "10px", width: "300px" }}
+      />
       <form onSubmit={editingProblem ? handleUpdate : handleSubmit}>
         <input
           type="text"

@@ -8,6 +8,7 @@ const ProblemsContext = createContext();
 
 const ProblemsProvider = ({ children }) => {
   const [problems, setProblems] = useState([]);
+  const [filteredProblems, setFilteredProblems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { auth } = useAuth();
@@ -26,6 +27,7 @@ const ProblemsProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${auth.token}` },
       });
       setProblems(response.data);
+      setFilteredProblems(response.data);
     } catch (error) {
       setError("Error fetching problems");
       toast.error("Error fetching problems.");
@@ -44,7 +46,9 @@ const ProblemsProvider = ({ children }) => {
           headers: { Authorization: `Bearer ${auth.token}` },
         }
       );
-      setProblems([...problems, response.data]);
+      const updatedProblems = [...problems, response.data];
+      setProblems(updatedProblems);
+      setFilteredProblems(updatedProblems);
       toast.success("Problem created successfully.");
     } catch (error) {
       setError("Error creating problem");
@@ -64,11 +68,11 @@ const ProblemsProvider = ({ children }) => {
           headers: { Authorization: `Bearer ${auth.token}` },
         }
       );
-      setProblems(
-        problems.map((problem) =>
-          problem._id === id ? response.data : problem
-        )
+      const updatedProblems = problems.map((problem) =>
+        problem._id === id ? response.data : problem
       );
+      setProblems(updatedProblems);
+      setFilteredProblems(updatedProblems);
       toast.success("Problem updated successfully.");
     } catch (error) {
       setError("Error updating problem");
@@ -84,7 +88,11 @@ const ProblemsProvider = ({ children }) => {
       await axios.delete(`http://localhost:8000/api/problems/${id}`, {
         headers: { Authorization: `Bearer ${auth.token}` },
       });
-      setProblems(problems.filter((problem) => problem._id !== id));
+      const remainingProblems = problems.filter(
+        (problem) => problem._id !== id
+      );
+      setProblems(remainingProblems);
+      setFilteredProblems(remainingProblems);
       toast.success("Problem deleted successfully.");
     } catch (error) {
       setError("Error deleting problem");
@@ -93,15 +101,41 @@ const ProblemsProvider = ({ children }) => {
     setLoading(false);
   };
 
+  const filterProblems = (searchTerm) => {
+    const filtered = problems.filter((problem) =>
+      problem.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const sortedFiltered = filtered.sort((a, b) => {
+      const aTitle = a.title.toLowerCase();
+      const bTitle = b.title.toLowerCase();
+      const searchLower = searchTerm.toLowerCase();
+
+      if (aTitle.startsWith(searchLower) && !bTitle.startsWith(searchLower)) {
+        return -1;
+      } else if (
+        !aTitle.startsWith(searchLower) &&
+        bTitle.startsWith(searchLower)
+      ) {
+        return 1;
+      } else {
+        return aTitle.indexOf(searchLower) - bTitle.indexOf(searchLower);
+      }
+    });
+
+    setFilteredProblems(sortedFiltered);
+  };
+
   return (
     <ProblemsContext.Provider
       value={{
-        problems,
+        problems: filteredProblems,
         createProblem,
         updateProblem,
         deleteProblem,
         loading,
         error,
+        filterProblems,
       }}
     >
       {children}

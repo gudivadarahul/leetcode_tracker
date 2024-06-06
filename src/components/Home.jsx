@@ -1,6 +1,7 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+// src/components/Home.jsx
+import React from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Home = () => {
   const { auth } = useAuth();
@@ -11,6 +12,7 @@ const Home = () => {
         {!auth.token && <Link to="/login">Login</Link>}
         {!auth.token && <Link to="/signup">Signup</Link>}
         {auth.token && <Link to="/dashboard">Dashboard</Link>}
+        {auth.token && <Link to="/profile">Profile</Link>}
       </nav>
     </div>
   );
