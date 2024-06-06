@@ -13,15 +13,23 @@ const AuthProvider = ({ children }) => {
       const token = localStorage.getItem("token");
       const user = localStorage.getItem("user");
       if (token && user) {
-        const jwtDecode = (await import("jwt-decode")).default;
-        const decodedToken = jwtDecode(token);
-        if (decodedToken.exp * 1000 < Date.now()) {
+        try {
+          const { jwtDecode } = await import("jwt-decode");
+          const decodedToken = jwtDecode(token);
+          if (decodedToken.exp * 1000 < Date.now()) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            setAuth({ token: null, user: null });
+            toast.error("Session expired, please log in again.");
+          } else {
+            setAuth({ token, user });
+          }
+        } catch (error) {
+          console.error("Error decoding token:", error);
+          toast.error("Error decoding token. Please log in again.");
           localStorage.removeItem("token");
           localStorage.removeItem("user");
           setAuth({ token: null, user: null });
-          toast.error("Session expired, please log in again.");
-        } else {
-          setAuth({ token, user });
         }
       }
     };
