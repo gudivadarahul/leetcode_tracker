@@ -9,17 +9,21 @@ const router = express.Router();
 // Create a new problem
 router.post("/", authMiddleware, async (req, res) => {
   try {
-    const { title, description, difficulty, tags } = req.body;
+    const { title, description, difficulty, tags, timeTaken, activeRecall } =
+      req.body;
     const problem = new Problem({
       title,
       description,
       difficulty,
       tags,
+      timeTaken,
+      activeRecall,
       userId: req.user.id,
     });
     await problem.save();
     res.status(201).json(problem);
   } catch (error) {
+    console.error("From ROUTES: Error creating problem:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
@@ -59,6 +63,8 @@ router.put("/:id", authMiddleware, async (req, res) => {
     problem.description = description;
     problem.difficulty = difficulty;
     problem.tags = tags;
+    problem.timeTaken = timeTaken;
+    problem.activeRecall = activeRecall;
     problem.updatedAt = Date.now();
     await problem.save();
     res.json(problem);

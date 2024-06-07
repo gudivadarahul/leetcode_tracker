@@ -51,6 +51,7 @@ const ProblemsProvider = ({ children }) => {
       setFilteredProblems(updatedProblems);
       toast.success("Problem created successfully.");
     } catch (error) {
+      console.error("Error creating problem", error);
       setError("Error creating problem");
       toast.error("Error creating problem.");
     }

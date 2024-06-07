@@ -4,6 +4,7 @@ import { ProblemsContext } from "../context/ProblemsContext";
 import { Link } from "react-router-dom";
 import { debounce } from "lodash";
 import { Oval } from "react-loader-spinner";
+import "./ProblemsPage.css";
 
 const ProblemsPage = () => {
   const {
@@ -20,6 +21,8 @@ const ProblemsPage = () => {
     description: "",
     difficulty: "",
     tags: "",
+    timeTaken: "",
+    activeRecall: "",
   });
   const [editingProblem, setEditingProblem] = useState(null);
   const [formError, setFormError] = useState("");
@@ -36,13 +39,28 @@ const ProblemsPage = () => {
       !newProblem.description ||
       !newProblem.difficulty
     ) {
-      setFormError("All fields are required");
+      setFormError("Title, Description, and Difficulty are required");
+      return;
+    }
+    if (isNaN(newProblem.timeTaken)) {
+      setFormError("Time Taken must be a number");
       return;
     }
     setFormError("");
     const tagsArray = newProblem.tags.split(",").map((tag) => tag.trim());
-    createProblem({ ...newProblem, tags: tagsArray });
-    setNewProblem({ title: "", description: "", difficulty: "", tags: "" });
+    createProblem({
+      ...newProblem,
+      tags: tagsArray,
+      timeTaken: Number(newProblem.timeTaken),
+    });
+    setNewProblem({
+      title: "",
+      description: "",
+      difficulty: "",
+      tags: "",
+      timeTaken: "",
+      activeRecall: "",
+    });
   };
 
   const handleUpdate = (e) => {
@@ -52,12 +70,20 @@ const ProblemsPage = () => {
       !editingProblem.description ||
       !editingProblem.difficulty
     ) {
-      setFormError("All fields are required");
+      setFormError("Title, Description, and Difficulty are required");
+      return;
+    }
+    if (isNaN(editingProblem.timeTaken)) {
+      setFormError("Time Taken must be a number");
       return;
     }
     setFormError("");
     const tagsArray = editingProblem.tags.split(",").map((tag) => tag.trim());
-    updateProblem(editingProblem._id, { ...editingProblem, tags: tagsArray });
+    updateProblem(editingProblem._id, {
+      ...editingProblem,
+      tags: tagsArray,
+      timeTaken: Number(editingProblem.timeTaken),
+    });
     setEditingProblem(null);
   };
 
@@ -90,7 +116,10 @@ const ProblemsPage = () => {
             onChange={handleSearch}
             style={{ marginBottom: "20px", padding: "10px", width: "300px" }}
           />
-          <form onSubmit={editingProblem ? handleUpdate : handleSubmit}>
+          <form
+            onSubmit={editingProblem ? handleUpdate : handleSubmit}
+            style={{ marginBottom: "20px" }}
+          >
             <input
               type="text"
               placeholder="Title"
@@ -154,25 +183,77 @@ const ProblemsPage = () => {
                   : setNewProblem({ ...newProblem, tags: e.target.value })
               }
             />
+            <input
+              type="text"
+              placeholder="Time Taken"
+              value={
+                editingProblem ? editingProblem.timeTaken : newProblem.timeTaken
+              }
+              onChange={(e) =>
+                editingProblem
+                  ? setEditingProblem({
+                      ...editingProblem,
+                      timeTaken: e.target.value,
+                    })
+                  : setNewProblem({ ...newProblem, timeTaken: e.target.value })
+              }
+            />
+            <input
+              type="text"
+              placeholder="Active Recall Notes"
+              value={
+                editingProblem
+                  ? editingProblem.activeRecall
+                  : newProblem.activeRecall
+              }
+              onChange={(e) =>
+                editingProblem
+                  ? setEditingProblem({
+                      ...editingProblem,
+                      activeRecall: e.target.value,
+                    })
+                  : setNewProblem({
+                      ...newProblem,
+                      activeRecall: e.target.value,
+                    })
+              }
+            />
             <button type="submit">
               {editingProblem ? "Update Problem" : "Add Problem"}
             </button>
             {formError && <p style={{ color: "red" }}>{formError}</p>}
           </form>
-          <ul>
-            {problems.map((problem) => (
-              <li key={problem._id}>
-                <h3>{problem.title}</h3>
-                <p>{problem.description}</p>
-                <p>{problem.difficulty}</p>
-                <p>{problem.tags.join(", ")}</p>
-                <button onClick={() => handleEdit(problem)}>Edit</button>
-                <button onClick={() => deleteProblem(problem._id)}>
-                  Delete
-                </button>
-              </li>
-            ))}
-          </ul>
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Difficulty</th>
+                <th>Tags</th>
+                <th>Time Taken</th>
+                <th>Active Recall</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {problems.map((problem) => (
+                <tr key={problem._id}>
+                  <td>{problem.title}</td>
+                  <td>{problem.description}</td>
+                  <td>{problem.difficulty}</td>
+                  <td>{problem.tags.join(", ")}</td>
+                  <td>{problem.timeTaken}</td>
+                  <td>{problem.activeRecall}</td>
+                  <td>
+                    <button onClick={() => handleEdit(problem)}>Edit</button>
+                    <button onClick={() => deleteProblem(problem._id)}>
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </>
       )}
     </div>
